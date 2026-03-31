@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WisePath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --background: hsl(40, 33%, 98%);
+      --foreground: hsl(215, 25%, 27%);
+      --border: hsl(214, 20%, 85%);
+      --card: hsl(0, 0%, 100%);
+      --card-border: hsl(214, 20%, 90%);
+      --primary: hsl(211, 40%, 45%);
+      --primary-fg: hsl(0, 0%, 100%);
+      --primary-light: hsl(211, 40%, 95%);
+      --secondary: hsl(152, 24%, 45%);
+      --secondary-fg: hsl(0, 0%, 100%);
+      --secondary-light: hsl(152, 24%, 95%);
+      --muted: hsl(40, 20%, 94%);
+      --muted-fg: hsl(215, 15%, 45%);
+      --accent: hsl(38, 60%, 85%);
+      --accent-fg: hsl(215, 25%, 27%);
+      --radius: 0.75rem;
+      --font-sans: 'Inter', sans-serif;
+      --font-serif: 'Lora', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(hsl(215 25% 27% / 0.05) 1px, transparent 0);
+      background-size: 32px 32px;
+      background-position: -19px -19px;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-serif);
+      letter-spacing: -0.02em;
+      color: var(--foreground);
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Layout ── */
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      width: 100%;
+      border-bottom: 1px solid hsl(214, 20%, 85%, 0.4);
+      background: hsl(40, 33%, 98%, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .header-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 2rem;
+      height: 80px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.625rem;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .logo:hover { opacity: 0.8; }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--primary); color: var(--primary-fg);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.15);
+    }
+    .logo-icon svg { width: 24px; height: 24px; }
+    .logo-text {
+      font-family: var(--font-serif);
+      font-size: 1.5rem; font-weight: 600;
+      color: var(--foreground); letter-spacing: -0.02em;
+    }
+    nav { display: flex; align-items: center; gap: 1.5rem; }
+    nav a {
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--muted-fg);
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--primary); }
+
+    /* ── Main ── */
+    main { flex: 1; display: flex; flex-direction: column; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid hsl(214, 20%, 85%, 0.4);
+      background: hsl(40, 20%, 94%, 0.3);
+      padding: 3rem 2rem;
+      margin-top: auto;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-brand { display: flex; align-items: center; gap: 0.5rem; color: var(--muted-fg); }
+    .footer-brand svg { width: 20px; height: 20px; }
+    .footer-brand span { font-family: var(--font-serif); font-weight: 500; font-size: 0.95rem; }
+    .footer-copy { font-size: 0.875rem; color: var(--muted-fg); text-align: center; }
+
+    /* ── Pages ── */
+    .page { display: none; flex: 1; flex-direction: column; }
+    .page.active { display: flex; }
+
+    /* ── Home Page ── */
+    #page-home {
+      position: relative; align-items: center; justify-content: center;
+      padding: 5rem 2rem; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(135deg,
+        hsl(211, 60%, 88%) 0%,
+        hsl(152, 40%, 88%) 35%,
+        hsl(38, 60%, 90%) 70%,
+        hsl(211, 40%, 92%) 100%);
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: hsl(40, 33%, 98%, 0.82);
+    }
+    .hero-content {
+      text-align: center; max-width: 900px; width: 100%;
+      animation: slideUp 0.8s ease both;
+    }
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700; line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title .accent { color: var(--primary); font-style: italic; }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted-fg); margin-bottom: 4rem;
+      max-width: 680px; margin-left: auto; margin-right: auto;
+      line-height: 1.7; margin-bottom: 4rem;
+    }
+    .hero-cards {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; max-width: 800px; margin: 0 auto;
+    }
+    @media (max-width: 640px) { .hero-cards { grid-template-columns: 1fr; } }
+
+    /* ── Huge Button ── */
+    .huge-btn {
+      position: relative; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 3rem 2rem; text-align: center;
+      background: hsl(0 0% 100% / 0.6);
+      backdrop-filter: blur(8px);
+      border: 2px solid hsl(214, 20%, 85%, 0.5);
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.06);
+      cursor: pointer; transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .huge-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, hsl(211 40% 45% / 0.05), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .huge-btn:hover { box-shadow: 0 8px 24px hsl(215 25% 27% / 0.12); transform: translateY(-3px); border-color: hsl(211 40% 45% / 0.4); }
+    .huge-btn:hover::before { opacity: 1; }
+    .huge-btn-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.1);
+    }
+    .huge-btn-icon svg { width: 40px; height: 40px; }
+    .huge-btn-icon.primary { background: hsl(211 40% 45% / 0.1); color: var(--primary); }
+    .huge-btn:hover .huge-btn-icon.primary { background: var(--primary); color: var(--primary-fg); transform: scale(1.1); }
+    .huge-btn-icon.secondary { background: hsl(152 24% 45% / 0.1); color: var(--secondary); }
+    .huge-btn:hover .huge-btn-icon.secondary { background: var(--secondary); color: var(--secondary-fg); transform: scale(1.1); }
+    .huge-btn h3 {
+      font-family: var(--font-serif); font-size: 1.35rem; font-weight: 500;
+      margin-bottom: 0.75rem;
+      transition: color 0.2s;
+    }
+    .huge-btn:hover.primary-hover h3 { color: var(--primary); }
+    .huge-btn:hover.secondary-hover h3 { color: var(--secondary); }
+    .huge-btn p { color: var(--muted-fg); font-size: 0.875rem; max-width: 260px; line-height: 1.6; }
+
+    /* ── Container ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+    .container-md { max-width: 900px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+    .container-sm { max-width: 800px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.875rem; font-weight: 500; color: var(--muted-fg);
+      transition: color 0.2s; cursor: pointer; margin-bottom: 2.5rem;
+    }
+    .back-link:hover { color: var(--primary); }
+    .back-link.secondary:hover { color: var(--secondary); }
+    .back-link svg { width: 16px; height: 16px; }
+
+    /* ── Page Header ── */
+    .page-header { margin-bottom: 3rem; animation: slideUp 0.6s ease both; }
+    .page-header-icon {
+      width: 64px; height: 64px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .page-header-icon svg { width: 32px; height: 32px; }
+    .page-header-icon.primary { background: hsl(211 40% 45% / 0.1); color: var(--primary); }
+    .page-header-icon.secondary { background: hsl(152 24% 45% / 0.1); color: var(--secondary); }
+    .page-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; margin-bottom: 1rem; }
+    .page-subtitle { font-size: 1.1rem; color: var(--muted-fg); max-width: 560px; line-height: 1.7; }
+
+    /* ── HelpForMyself grid ── */
+    #page-myself { padding: 4rem 2rem; }
+    .myself-header { text-align: center; margin-bottom: 4rem; animation: slideUp 0.6s ease both; }
+    .myself-header h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; margin-bottom: 1.5rem; }
+    .myself-header p { font-size: 1.1rem; color: var(--muted-fg); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+    .myself-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+    @media (max-width: 860px) { .myself-grid { grid-template-columns: 1fr; max-width: 480px; } }
+    .myself-card {
+      position: relative; display: flex; flex-direction: column;
+      align-items: flex-start; padding: 2rem;
+      background: hsl(0 0% 100% / 0.6); backdrop-filter: blur(8px);
+      border: 2px solid hsl(214, 20%, 85%, 0.5);
+      border-radius: 1rem; cursor: pointer;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.06);
+      transition: all 0.3s ease; overflow: hidden;
+      text-align: left;
+    }
+    .myself-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, hsl(211 40% 45% / 0.05), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .myself-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px hsl(215 25% 27% / 0.12); border-color: hsl(211 40% 45% / 0.4); }
+    .myself-card:hover::before { opacity: 1; }
+    .myself-card .card-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem; transition: all 0.3s;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.1);
+    }
+    .myself-card .card-icon svg { width: 28px; height: 28px; }
+    .myself-card .card-icon.primary { background: hsl(211 40% 45% / 0.1); color: var(--primary); }
+    .myself-card:hover .card-icon.primary { background: var(--primary); color: var(--primary-fg); }
+    .myself-card .card-icon.secondary { background: hsl(152 24% 45% / 0.1); color: var(--secondary); }
+    .myself-card:hover .card-icon.secondary { background: var(--secondary); color: var(--secondary-fg); }
+    .myself-card .card-icon.accent { background: hsl(38 60% 85% / 0.4); color: var(--accent-fg); }
+    .myself-card:hover .card-icon.accent { background: var(--accent-fg); color: var(--accent); }
+    .myself-card p {
+      font-size: 1.05rem; font-weight: 500; line-height: 1.5;
+      color: var(--foreground); margin-top: auto; transition: color 0.2s;
+    }
+    .myself-card:hover.primary-hover p { color: var(--primary); }
+    .myself-card:hover.secondary-hover p { color: var(--secondary); }
+
+    /* ── Card List ── */
+    .card-list {
+      background: hsl(0 0% 100% / 0.7); backdrop-filter: blur(12px);
+      border: 2px solid hsl(214, 20%, 85%, 0.5);
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.06);
+      overflow: hidden;
+    }
+    .card-list-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid hsl(214, 20%, 85%, 0.4);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .card-list-item:last-child { border-bottom: none; }
+    .card-list-item:hover { background: hsl(211 40% 45% / 0.05); }
+    .card-list-item.secondary:hover { background: hsl(152 24% 45% / 0.05); }
+    .card-list-item-left { display: flex; align-items: flex-start; gap: 1.25rem; }
+    .item-num {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.875rem; font-weight: 700;
+      transition: all 0.2s;
+    }
+    .item-num.primary { background: hsl(211 40% 45% / 0.1); color: var(--primary); }
+    .card-list-item:hover .item-num.primary { background: var(--primary); color: var(--primary-fg); }
+    .item-num.secondary { background: hsl(152 24% 45% / 0.1); color: var(--secondary); }
+    .card-list-item.secondary:hover .item-num.secondary { background: var(--secondary); color: var(--secondary-fg); }
+    .item-content { display: flex; flex-direction: column; gap: 0.375rem; }
+    .item-title {
+      font-family: var(--font-serif); font-size: 1.15rem; font-weight: 600;
+      transition: color 0.2s;
+    }
+    .card-list-item:hover .item-title { color: var(--primary); }
+    .card-list-item.secondary:hover .item-title { color: var(--secondary); }
+    .item-desc { font-size: 0.95rem; color: var(--muted-fg); line-height: 1.6; }
+    .item-arrow {
+      flex-shrink: 0; margin-top: 0.375rem;
+      color: var(--muted-fg); opacity: 0;
+      transition: all 0.2s;
+    }
+    .item-arrow svg { width: 20px; height: 20px; }
+    .card-list-item:hover .item-arrow { opacity: 1; transform: translateX(3px); }
+
+    /* simple list item (no description) */
+    .simple-list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid hsl(214, 20%, 85%, 0.4);
+      cursor: default; transition: background 0.2s;
+    }
+    .simple-list-item:last-child { border-bottom: none; }
+    .simple-list-item:hover { background: hsl(152 24% 45% / 0.05); }
+    .simple-list-left { display: flex; align-items: center; gap: 1rem; }
+    .simple-list-item span { font-size: 1.05rem; font-weight: 500; color: hsl(215, 25%, 27%, 0.9); }
+    .simple-list-item:hover span { color: var(--foreground); }
+    .simple-arrow { color: var(--muted-fg); opacity: 0; transition: all 0.2s; }
+    .simple-arrow svg { width: 20px; height: 20px; }
+    .simple-list-item:hover .simple-arrow { opacity: 1; transform: translateX(-3px); }
+
+    /* ── AHCD Page ── */
+    .ahcd-card {
+      background: hsl(0 0% 100% / 0.7); backdrop-filter: blur(12px);
+      border: 2px solid hsl(214, 20%, 85%, 0.5);
+      border-radius: 1rem;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 1px 3px hsl(215 25% 27% / 0.06);
+      animation: slideUp 0.7s ease 0.15s both;
+    }
+    @media (max-width: 640px) { .ahcd-card { padding: 1.5rem; } }
+    .ahcd-card p { font-size: 1.05rem; line-height: 1.8; color: hsl(215, 25%, 27%, 0.9); margin-bottom: 1.5rem; }
+    .ahcd-card p:last-of-type { margin-bottom: 0; }
+    .ahcd-link { color: var(--primary); font-weight: 500; display: inline-flex; align-items: center; gap: 0.2rem; }
+    .ahcd-link:hover { text-decoration: underline; }
+    .ahcd-link svg { width: 12px; height: 12px; }
+    .ahcd-callout {
+      margin-top: 2rem; padding: 1.5rem;
+      background: hsl(211 40% 45% / 0.05);
+      border-radius: 0.75rem;
+      border: 1px solid hsl(211 40% 45% / 0.2);
+    }
+    .ahcd-callout p { font-weight: 500; margin: 0; }
+    .ahcd-callout .ahcd-link svg { width: 16px; height: 16px; }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Sub-page wrappers ── */
+    #page-myself, #page-forward, #page-condition, #page-ahcd {
+      padding-top: 3rem; padding-bottom: 4rem;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo" onclick="navigate('home')">
+        <div class="logo-icon">
+          <!-- Compass icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+          </svg>
+        </div>
+        <span class="logo-text">WisePath</span>
+      </div>
+      <nav>
+        <a href="#" id="nav-home" class="active" onclick="navigate('home'); return false;">Home</a>
+        <a href="#">Resources</a>
+        <a href="#">About Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ════ HOME PAGE ════ -->
+    <div id="page-home" class="page active">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          WisePath: Your Trusted Guide to <span class="accent">Golden Years</span> Living in the Golden State
+        </h1>
+        <p class="hero-subtitle">
+          Simple, helpful resources for health, technology, legal, and financial guidance for California's aging population— all in one place.
+        </p>
+        <div class="hero-cards">
+          <div class="huge-btn primary-hover" onclick="navigate('myself')">
+            <div class="huge-btn-icon primary">
+              <!-- User icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>I'm seeking help for myself</h3>
+            <p>Find resources and guidance tailored to your current situation and planning needs.</p>
+          </div>
+          <div class="huge-btn secondary-hover" onclick="void(0)">
+            <div class="huge-btn-icon secondary">
+              <!-- Users icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>I'm helping someone else</h3>
+            <p>Find tools and actionable guidance for caregiving and supporting a loved one.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ HELP FOR MYSELF PAGE ════ -->
+    <div id="page-myself" class="page">
+      <div class="container">
+        <div class="myself-header">
+          <a class="back-link" onclick="navigate('home')">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+            Back to Home
+          </a>
+          <h1>Which one describes you?</h1>
+          <p>Select the option that best fits your current situation so we can guide you to the right resources.</p>
+        </div>
+        <div class="myself-grid">
+          <div class="myself-card primary-hover" onclick="navigate('forward')">
+            <div class="card-icon primary">
+              <!-- ShieldCheck -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <p>I'm relatively healthy and want forward planning guidance so I can age with confidence and a plan.</p>
+          </div>
+          <div class="myself-card secondary-hover" onclick="navigate('condition')">
+            <div class="card-icon secondary">
+              <!-- Stethoscope -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+            </div>
+            <p>I recently experienced a change in my health and I need information on my options moving forward.</p>
+          </div>
+          <div class="myself-card" onclick="void(0)">
+            <div class="card-icon accent">
+              <!-- BookOpen -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <p>I need education on a specific topic.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ FORWARD PLANNING PAGE ════ -->
+    <div id="page-forward" class="page">
+      <div class="container-sm">
+        <a class="back-link" onclick="navigate('myself')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+          Back to Options
+        </a>
+        <div class="page-header">
+          <div class="page-header-icon primary">
+            <!-- CheckCircle2 -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h1 class="page-title">Forward Planning:</h1>
+          <p class="page-subtitle">Resources and guidance to help you age with confidence and a secure plan. Explore the topics below.</p>
+        </div>
+        <div class="card-list" id="forward-list"></div>
+      </div>
+    </div>
+
+    <!-- ════ CHANGE IN CONDITION PAGE ════ -->
+    <div id="page-condition" class="page">
+      <div class="container-sm">
+        <a class="back-link secondary" onclick="navigate('myself')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+          Back to Options
+        </a>
+        <div class="page-header">
+          <div class="page-header-icon secondary">
+            <!-- AlertCircle -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h1 class="page-title">Change in Condition:</h1>
+          <p class="page-subtitle">Information on your options moving forward after a recent change in health. Explore the topics below.</p>
+        </div>
+        <div class="card-list" id="condition-list"></div>
+      </div>
+    </div>
+
+    <!-- ════ ADVANCE HEALTH CARE DIRECTIVE PAGE ════ -->
+    <div id="page-ahcd" class="page">
+      <div class="container-sm">
+        <a class="back-link" onclick="navigate('forward')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+          Back to Forward Planning
+        </a>
+        <div class="page-header">
+          <div class="page-header-icon primary">
+            <!-- FileText -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <h1 class="page-title">Advanced Health Care Directives Explained</h1>
+        </div>
+        <div class="ahcd-card">
+          <p>Every adult should have an advance directive in which you explain the type of health care you do or do not want when you can't make your own decisions. You should also appoint someone who can speak for you to make sure your wishes are carried out.</p>
+          <p>States have specific forms for these documents so health care professionals can easily recognize the document's purpose. To make things a little confusing, states use various terms to describe their advance directive forms.</p>
+          <p>Advance directive is the general term that refers to the various documents that could include a living will, instruction directive, health care proxy or health care power of attorney.</p>
+          <p>A <a href="https://www.aarp.org/caregiving/financial-legal/what-is-a-living-will/" target="_blank" rel="noopener noreferrer" class="ahcd-link">living will <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> (or instruction directive) alerts medical professionals and your family to the treatments you want to receive or refuse. In most states this document only goes into effect if you meet specific medical criteria and are unable to make decisions.</p>
+          <p>In a <a href="https://www.aarp.org/caregiving/financial-legal/types-of-power-of-attorney/" target="_blank" rel="noopener noreferrer" class="ahcd-link">health care power of attorney <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> (or health care proxy) you select the family member or trusted friend you want to make health care decisions for you when you cannot. In this document you should give directions to the person you select as your spokesperson (or health care agent or proxy) about the full range of care you want. It is very important that you talk with this person about your health care wishes.</p>
+          <p>Some states combine the two forms so you can record your treatment preferences and name your health care advocate in one document. When you download your state's form you'll find what you need.</p>
+          <div class="ahcd-callout">
+            <p>Here's a <a href="#" class="ahcd-link">link <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> to California's Advanced Directive form.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        </svg>
+        <span>WisePath</span>
+      </div>
+      <p class="footer-copy">&copy; <span id="year"></span> WisePath. A guide to Golden Years living.</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const pages = ['home', 'myself', 'forward', 'condition', 'ahcd'];
+  const chevronRight = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+  function navigate(page) {
+    pages.forEach(p => {
+      document.getElementById('page-' + p).classList.remove('active');
+    });
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('nav-home').classList.toggle('active', page === 'home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Build Forward Planning list
+  const forwardTopics = [
+    { title: "Advance Health Care Directive Support", desc: "Get step‑by‑step guidance to choose a healthcare proxy and document your care wishes.", page: "ahcd" },
+    { title: "POLST Discussion & Completion", desc: "Clarify your goals of care and turn them into medical orders providers will honor." },
+    { title: "Wills, Trusts & Financial Power of Attorney", desc: "Understand your options and get referrals to organize legal and financial protections." },
+    { title: "Medi‑Cal Eligibility & Application Help", desc: "Learn which programs you may qualify for and what's needed to apply." },
+    { title: "Fall Risk Review & Safety Devices", desc: "Identify fall risks and explore devices that can detect falls and call for help." },
+    { title: "Medical ID & Alert Bracelets", desc: "Choose medical ID options so first responders know your conditions and medications." },
+    { title: "Preventative Screening Planning", desc: "Build a simple plan for age‑appropriate screenings and regular check‑ups." },
+    { title: "Medicare Coverage & Plan Review", desc: "Make sense of Medicare parts, supplements, and enrollment choices." },
+    { title: "Housing & Long‑Term Care Options", desc: "Explore staying at home safely, in‑home support, and senior living alternatives." },
+  ];
+
+  const forwardList = document.getElementById('forward-list');
+  forwardTopics.forEach((t, i) => {
+    const li = document.createElement('div');
+    li.className = 'card-list-item';
+    if (t.page) li.style.cursor = 'pointer';
+    li.innerHTML = `
+      <div class="card-list-item-left">
+        <div class="item-num primary">${i + 1}</div>
+        <div class="item-content">
+          <span class="item-title">${t.title}</span>
+          <p class="item-desc">${t.desc}</p>
+        </div>
+      </div>
+      <div class="item-arrow">${chevronRight}</div>`;
+    if (t.page) li.onclick = () => navigate(t.page);
+    forwardList.appendChild(li);
+  });
+
+  // Build Change in Condition list
+  const conditionTopics = [
+    "Hospital Resources and Advocacy",
+    "Legal Aid",
+    "Housing Options",
+    "Palliative Care",
+    "Hospice",
+    "End of Life Planning"
+  ];
+
+  const conditionList = document.getElementById('condition-list');
+  conditionTopics.forEach((t, i) => {
+    const li = document.createElement('div');
+    li.className = 'simple-list-item';
+    li.innerHTML = `
+      <div class="simple-list-left">
+        <div class="item-num secondary">${i + 1}</div>
+        <span>${t}</span>
+      </div>
+      <div class="simple-arrow">${chevronRight}</div>`;
+    conditionList.appendChild(li);
+  });
+</script>
+</body>
+</html>
